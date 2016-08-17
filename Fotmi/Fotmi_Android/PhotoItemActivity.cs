@@ -1,23 +1,77 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Android;
 using Android.App;
+using Android.Content;
+using Android.Content.PM;
+using Android.Graphics;
 using Android.OS;
+using Android.Provider;
 using Android.Widget;
 using FotmiPortableLibrary;
-using Fotmi_Android;
+using File = Java.IO.File;
+using Environment = Android.OS.Environment;
+using Uri = Android.Net.Uri;
 
 namespace Fotmi_Android
 {
+    public static class AppHelp
+    {
+        public static File File;
+        public static File Dir;
+        public static Bitmap Bitmap;
+    }
+
     [Activity(Label = "PhotoItemActivity")]
-    /// <summary>
-    /// View/edit a Task
-    /// </summary>
+
+    // View/edit a Task
+
     public class PhotoItemActivity : Activity
     {
         PhotoItem photo = new PhotoItem();
-        Button cancelDeleteButton;
+        ImageView _imageView;
+        byte[] _byteData;
         EditText notesTextEdit;
         EditText nameTextEdit;
         Button saveButton;
+        Button cancelDeleteButton;
+        Button captureButton;
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+
+            // Make it available in the gallery
+
+            Intent mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
+            Uri contentUri = Uri.FromFile(AppHelp.File);
+            mediaScanIntent.SetData(contentUri);
+            SendBroadcast(mediaScanIntent);
+
+            // Display in ImageView. We will resize the bitmap to fit the display
+            // Loading the full sized image will consume to much memory 
+            // and cause the application to crash.
+
+            int height = Resources.DisplayMetrics.HeightPixels;
+            int width = _imageView.Height;
+
+            AppHelp.Bitmap = AppHelp.File.Path.LoadAndResizeBitmap(width, height);
+
+            if (AppHelp.Bitmap != null)
+            {
+                _imageView.SetImageBitmap(AppHelp.Bitmap);
+
+                using (var stream = new MemoryStream())
+                {
+                    AppHelp.Bitmap.Compress(Bitmap.CompressFormat.Png, 0, stream);
+                    _byteData = stream.ToArray();
+                }
+            }
+
+            // Dispose of the Java side bitmap.
+            GC.Collect();
+        }
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -35,7 +89,7 @@ namespace Fotmi_Android
             nameTextEdit = FindViewById<EditText>(Resource.Id.NameText);
             notesTextEdit = FindViewById<EditText>(Resource.Id.NotesText);
             saveButton = FindViewById<Button>(Resource.Id.SaveButton);
-
+            captureButton = FindViewById<Button>(Resource.Id.CaptureButton);
 
             // find all our controls
             cancelDeleteButton = FindViewById<Button>(Resource.Id.CancelDeleteButton);
@@ -49,12 +103,21 @@ namespace Fotmi_Android
             // button clicks 
             cancelDeleteButton.Click += (sender, e) => { CancelDelete(); };
             saveButton.Click += (sender, e) => { Save(); };
+
+            if (IsThereAnAppToTakePictures())
+            {
+                CreateDirectoryForPictures();
+
+                _imageView = FindViewById<ImageView>(Resource.Id.ImvImage);
+                captureButton.Click += TakeAPicture;
+            }
         }
 
         void Save()
         {
             photo.Name = nameTextEdit.Text;
             photo.Notes = notesTextEdit.Text;
+            photo.Image = _byteData;
 
             FotmiApp.Current.PhotoManager.SavePhoto(photo);
             Finish();
@@ -69,5 +132,34 @@ namespace Fotmi_Android
             Finish();
         }
 
+        private void CreateDirectoryForPictures()
+        {
+            AppHelp.Dir = new File(
+                Environment.GetExternalStoragePublicDirectory(
+                    Environment.DirectoryPictures), "Fotmi_Android");
+            if (!AppHelp.Dir.Exists())
+            {
+                AppHelp.Dir.Mkdirs();
+            }
+        }
+
+        private bool IsThereAnAppToTakePictures()
+        {
+            Intent intent = new Intent(MediaStore.ActionImageCapture);
+            IList<ResolveInfo> availableActivities =
+                PackageManager.QueryIntentActivities(intent, PackageInfoFlags.MatchDefaultOnly);
+            return availableActivities != null && availableActivities.Count > 0;
+        }
+
+        private void TakeAPicture(object sender, EventArgs eventArgs)
+        {
+            Intent intent = new Intent(MediaStore.ActionImageCapture);
+
+            AppHelp.File = new File(AppHelp.Dir, String.Format("Images_{0}.jpg", Guid.NewGuid()));
+
+            intent.PutExtra(MediaStore.ExtraOutput, Uri.FromFile(AppHelp.File));
+
+            StartActivityForResult(intent, 0);
+        }
     }
 }
