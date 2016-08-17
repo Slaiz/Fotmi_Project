@@ -37,9 +37,9 @@ namespace Fotmi_Android
             if (photoListView != null)
             {
                 photoListView.ItemClick += (object sender, AdapterView.ItemClickEventArgs e) => {
-                    var taskDetails = new Intent(this, typeof(PhotoItemActivity));
-                    taskDetails.PutExtra("PhotoID", photos[e.Position].ID);
-                    StartActivity(taskDetails);
+                    var photoDetails = new Intent(this, typeof(PhotoItemActivity));
+                    photoDetails.PutExtra("PhotoID", photos[e.Position].ID);
+                    StartActivity(photoDetails);
                 };
             }
         }

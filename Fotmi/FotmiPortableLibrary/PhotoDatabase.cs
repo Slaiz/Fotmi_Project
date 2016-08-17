@@ -1,13 +1,10 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Generic;
 using SQLite;
 
 namespace FotmiPortableLibrary
 {
-    /// <summary>
-    /// PhotoDatabase uses ADO.NET to create the [Items] table and create,read,update,delete data
-    /// </summary>
+    // PhotoDatabase uses ADO.NET to create the [Items] table and create,read,update,delete data
 
     public class PhotoDatabase
     {

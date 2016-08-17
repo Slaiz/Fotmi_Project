@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Android;
+using System.Runtime.CompilerServices;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
+using Android.Graphics.Drawables;
+using Android.Media;
 using Android.OS;
 using Android.Provider;
+using Android.Views;
 using Android.Widget;
 using FotmiPortableLibrary;
 using File = Java.IO.File;
@@ -67,6 +70,8 @@ namespace Fotmi_Android
                     AppHelp.Bitmap.Compress(Bitmap.CompressFormat.Png, 0, stream);
                     _byteData = stream.ToArray();
                 }
+
+                AppHelp.Bitmap = null;
             }
 
             // Dispose of the Java side bitmap.
@@ -78,6 +83,7 @@ namespace Fotmi_Android
             base.OnCreate(bundle);
 
             int photoID = Intent.GetIntExtra("PhotoID", 0);
+
             if (photoID > 0)
             {
                 photo = FotmiApp.Current.PhotoManager.GetPhoto(photoID);
@@ -88,8 +94,11 @@ namespace Fotmi_Android
 
             nameTextEdit = FindViewById<EditText>(Resource.Id.NameText);
             notesTextEdit = FindViewById<EditText>(Resource.Id.NotesText);
+
             saveButton = FindViewById<Button>(Resource.Id.SaveButton);
             captureButton = FindViewById<Button>(Resource.Id.CaptureButton);
+
+            _imageView = FindViewById<ImageView>(Resource.Id.ImvImage);
 
             // find all our controls
             cancelDeleteButton = FindViewById<Button>(Resource.Id.CancelDeleteButton);
@@ -100,15 +109,45 @@ namespace Fotmi_Android
             nameTextEdit.Text = photo.Name;
             notesTextEdit.Text = photo.Notes;
 
+            if (photo.ID == 0)
+            {
+                _imageView.SetImageResource(Resource.Drawable.Icon);
+
+            }
+            else
+            {
+                byte[] i = photo.Image;
+                var l = photo.Image.Length;
+
+                Bitmap b = BitmapFactory.DecodeByteArray(i, 0, l);
+
+                _imageView.SetImageBitmap(b);
+
+                using (var stream = new MemoryStream())
+                {
+                    b.Compress(Bitmap.CompressFormat.Png, 0, stream);
+                    _byteData = stream.ToArray();
+                }
+            }
+
             // button clicks 
             cancelDeleteButton.Click += (sender, e) => { CancelDelete(); };
-            saveButton.Click += (sender, e) => { Save(); };
+            saveButton.Click += (sender, e) =>
+            {
+                if (_byteData != null)
+                {
+                    Save();
+                }
+                else
+                {
+                    Toast.MakeText(this, "Please capture photo", ToastLength.Long).Show();
+                }
+            };
 
             if (IsThereAnAppToTakePictures())
             {
                 CreateDirectoryForPictures();
 
-                _imageView = FindViewById<ImageView>(Resource.Id.ImvImage);
                 captureButton.Click += TakeAPicture;
             }
         }

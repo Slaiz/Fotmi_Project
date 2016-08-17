@@ -37,12 +37,12 @@
         android:layout_height="200dp"
         android:id="@+id/ImvImage"
         android:layout_below="@+id/NotesText" />
-  <Button
-    android:id="@+id/CaptureButton"
-    android:text="Capture"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@+id/ImvImage" />
+    <Button
+        android:id="@+id/CaptureButton"
+        android:text="Capture"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ImvImage" />
     <Button
         android:id="@+id/SaveButton"
         android:text="Save"

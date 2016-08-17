@@ -1,13 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Android.App;
-using Android.Content;
 using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using FotmiPortableLibrary;
@@ -44,13 +37,13 @@ namespace Fotmi_Android
             get { return photos.Count; }
         }
 
-        public override Android.Views.View GetView(int position, Android.Views.View convertView, Android.Views.ViewGroup parent)
+        public override View GetView(int position, View convertView, ViewGroup parent)
         {
             var view = (convertView ??
                     context.LayoutInflater.Inflate(
                     Resource.Layout.PhotoItemList,
                     parent,
-                    false)) as LinearLayout;
+                    false)) as RelativeLayout;
 
             // Find references to each subview in the list item's view
             var txtName = view.FindViewById<TextView>(Resource.Id.NameText);
@@ -62,7 +55,7 @@ namespace Fotmi_Android
             txtDescription.SetText(photos[position].Notes, TextView.BufferType.Normal);
 
             byte[] i = photos[position].Image;
-            int l = photos[position].Image.Length;
+            var l = photos[position].Image.Length;
 
             Bitmap b = BitmapFactory.DecodeByteArray(i, 0, l);
 
