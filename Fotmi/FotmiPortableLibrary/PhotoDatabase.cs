@@ -8,56 +8,52 @@ namespace FotmiPortableLibrary
 
     public class PhotoDatabase
     {
-        static object locker = new object();
+        static readonly object _locker = new object();
 
-        public SQLiteConnection database;
-
-        public string path;
+        private SQLiteConnection _database;
 
         public PhotoDatabase(SQLiteConnection conn)
         {
-            database = conn;
+            _database = conn;
             // create the tables
-            database.CreateTable<PhotoItem>();
+            _database.CreateTable<PhotoItem>();
         }
 
         public IEnumerable<PhotoItem> GetItems()
         {
-            lock (locker)
+            lock (_locker)
             {
-                return (from i in database.Table<PhotoItem>() select i).ToList();
+                return (from i in _database.Table<PhotoItem>() select i).ToList();
             }
         }
 
         public PhotoItem GetItem(int id)
         {
-            lock (locker)
+            lock (_locker)
             {
-                return database.Table<PhotoItem>().FirstOrDefault(x => x.ID == id);
+                return _database.Table<PhotoItem>().FirstOrDefault(x => x.ID == id);
             }
         }
 
         public int SaveItem(PhotoItem item)
         {
-            lock (locker)
+            lock (_locker)
             {
                 if (item.ID != 0)
                 {
-                    database.Update(item);
+                    _database.Update(item);
                     return item.ID;
                 }
-                else
-                {
-                    return database.Insert(item);
-                }
+
+                return _database.Insert(item);
             }
         }
 
         public int DeleteItem(int id)
         {
-            lock (locker)
+            lock (_locker)
             {
-                return database.Delete<PhotoItem>(id);
+                return _database.Delete<PhotoItem>(id);
             }
         }
     }

@@ -11,8 +11,8 @@ namespace Fotmi_Android
     public class HomeActivity : Activity
     {
 
-        PhotoItemListAdapter photoList;
-        IList<PhotoItem> photos;
+        PhotoItemListAdapter _photoList;
+        IList<PhotoItem> _photos;
         Button addPhotoButton;
         ListView photoListView;
 
@@ -24,8 +24,8 @@ namespace Fotmi_Android
 
             photoListView = FindViewById<ListView>(Resource.Id.photoList);
             addPhotoButton = FindViewById<Button>(Resource.Id.AddButton);
-
-            // wire up add task button handler
+            
+            // 
             if (addPhotoButton != null)
             {
                 addPhotoButton.Click += (sender, e) => {
@@ -33,12 +33,12 @@ namespace Fotmi_Android
                 };
             }
 
-            // wire up Photo click handler
+            // 
             if (photoListView != null)
             {
                 photoListView.ItemClick += (object sender, AdapterView.ItemClickEventArgs e) => {
                     var photoDetails = new Intent(this, typeof(PhotoItemActivity));
-                    photoDetails.PutExtra("PhotoID", photos[e.Position].ID);
+                    photoDetails.PutExtra("PhotoID", _photos[e.Position].ID);
                     StartActivity(photoDetails);
                 };
             }
@@ -48,13 +48,13 @@ namespace Fotmi_Android
         {
             base.OnResume();
 
-            photos = FotmiApp.Current.PhotoManager.GetPhotos();
+            _photos = FotmiApp.Current.PhotoService.GetPhotos();
 
             // create our adapter
-            photoList = new PhotoItemListAdapter(this, photos);
+            _photoList = new PhotoItemListAdapter(this, _photos);
 
             //Hook up our adapter to our ListView
-            photoListView.Adapter = photoList;
+            photoListView.Adapter = _photoList;
         }
     }
 }

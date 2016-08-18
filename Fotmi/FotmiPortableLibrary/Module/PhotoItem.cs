@@ -3,9 +3,7 @@
 namespace FotmiPortableLibrary
 {
 
-    /// <summary>
-    /// PhotoItem business object
-    /// </summary>
+    // PhotoItem business object
 
     public class PhotoItem
     {

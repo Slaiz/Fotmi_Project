@@ -19,7 +19,7 @@ using Uri = Android.Net.Uri;
 
 namespace Fotmi_Android
 {
-    public static class AppHelp
+    public static class ImageHelp
     {
         public static File File;
         public static File Dir;
@@ -28,12 +28,12 @@ namespace Fotmi_Android
 
     [Activity(Label = "PhotoItemActivity")]
 
-    // View/edit a Task
+    // View/edit a Photo, capture image
 
     public class PhotoItemActivity : Activity
     {
-        PhotoItem photo = new PhotoItem();
-        ImageView _imageView;
+        PhotoItem _photo = new PhotoItem();
+        ImageView imageView;
         byte[] _byteData;
         EditText notesTextEdit;
         EditText nameTextEdit;
@@ -48,7 +48,7 @@ namespace Fotmi_Android
             // Make it available in the gallery
 
             Intent mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
-            Uri contentUri = Uri.FromFile(AppHelp.File);
+            Uri contentUri = Uri.FromFile(ImageHelp.File);
             mediaScanIntent.SetData(contentUri);
             SendBroadcast(mediaScanIntent);
 
@@ -57,21 +57,13 @@ namespace Fotmi_Android
             // and cause the application to crash.
 
             int height = Resources.DisplayMetrics.HeightPixels;
-            int width = _imageView.Height;
+            int width = imageView.Height;
 
-            AppHelp.Bitmap = AppHelp.File.Path.LoadAndResizeBitmap(width, height);
+            ImageHelp.Bitmap = ImageHelp.File.Path.LoadAndResizeBitmap(width, height);
 
-            if (AppHelp.Bitmap != null)
+            if (ImageHelp.Bitmap != null)
             {
-                _imageView.SetImageBitmap(AppHelp.Bitmap);
-
-                using (var stream = new MemoryStream())
-                {
-                    AppHelp.Bitmap.Compress(Bitmap.CompressFormat.Png, 0, stream);
-                    _byteData = stream.ToArray();
-                }
-
-                AppHelp.Bitmap = null;
+                ImageConverting(ref ImageHelp.Bitmap);
             }
 
             // Dispose of the Java side bitmap.
@@ -86,7 +78,7 @@ namespace Fotmi_Android
 
             if (photoID > 0)
             {
-                photo = FotmiApp.Current.PhotoManager.GetPhoto(photoID);
+                _photo = FotmiApp.Current.PhotoService.GetPhoto(photoID);
             }
 
             // set our layout to be the home screen
@@ -95,43 +87,36 @@ namespace Fotmi_Android
             nameTextEdit = FindViewById<EditText>(Resource.Id.NameText);
             notesTextEdit = FindViewById<EditText>(Resource.Id.NotesText);
 
+            imageView = FindViewById<ImageView>(Resource.Id.ImvImage);
+
             saveButton = FindViewById<Button>(Resource.Id.SaveButton);
             captureButton = FindViewById<Button>(Resource.Id.CaptureButton);
-
-            _imageView = FindViewById<ImageView>(Resource.Id.ImvImage);
-
-            // find all our controls
             cancelDeleteButton = FindViewById<Button>(Resource.Id.CancelDeleteButton);
 
+            nameTextEdit.Text = _photo.Name;
+            notesTextEdit.Text = _photo.Notes;
+
             // set the cancel delete based on whether or not it's an existing photo
-            cancelDeleteButton.Text = (photo.ID == 0 ? "Cancel" : "Delete");
+            cancelDeleteButton.Text = (_photo.ID == 0 ? "Cancel" : "Delete");
 
-            nameTextEdit.Text = photo.Name;
-            notesTextEdit.Text = photo.Notes;
-
-            if (photo.ID == 0)
+            if (_photo.ID == 0)
             {
-                _imageView.SetImageResource(Resource.Drawable.Icon);
+                imageView.SetImageResource(Resource.Drawable.Icon);
 
             }
             else
             {
-                byte[] i = photo.Image;
-                var l = photo.Image.Length;
+                byte[] i = _photo.Image;
+                var l = _photo.Image.Length;
 
                 Bitmap b = BitmapFactory.DecodeByteArray(i, 0, l);
 
-                _imageView.SetImageBitmap(b);
-
-                using (var stream = new MemoryStream())
-                {
-                    b.Compress(Bitmap.CompressFormat.Png, 0, stream);
-                    _byteData = stream.ToArray();
-                }
+                ImageConverting(ref b);
             }
 
             // button clicks 
             cancelDeleteButton.Click += (sender, e) => { CancelDelete(); };
+
             saveButton.Click += (sender, e) =>
             {
                 if (_byteData != null)
@@ -152,34 +137,37 @@ namespace Fotmi_Android
             }
         }
 
+        private void ImageConverting(ref Bitmap bitmap)
+        {
+            imageView.SetImageBitmap(bitmap);
+
+            using (var stream = new MemoryStream())
+            {
+                bitmap.Compress(Bitmap.CompressFormat.Png, 0, stream);
+                _byteData = stream.ToArray();
+            }
+
+            bitmap = null;
+        }
+
+
         void Save()
         {
-            photo.Name = nameTextEdit.Text;
-            photo.Notes = notesTextEdit.Text;
-            photo.Image = _byteData;
+            _photo.Name = nameTextEdit.Text;
+            _photo.Notes = notesTextEdit.Text;
+            _photo.Image = _byteData;
 
-            FotmiApp.Current.PhotoManager.SavePhoto(photo);
+            FotmiApp.Current.PhotoService.SavePhoto(_photo);
             Finish();
         }
 
         void CancelDelete()
         {
-            if (photo.ID != 0)
+            if (_photo.ID != 0)
             {
-                FotmiApp.Current.PhotoManager.DeletePhoto(photo.ID);
+                FotmiApp.Current.PhotoService.DeletePhoto(_photo.ID);
             }
             Finish();
-        }
-
-        private void CreateDirectoryForPictures()
-        {
-            AppHelp.Dir = new File(
-                Environment.GetExternalStoragePublicDirectory(
-                    Environment.DirectoryPictures), "Fotmi_Android");
-            if (!AppHelp.Dir.Exists())
-            {
-                AppHelp.Dir.Mkdirs();
-            }
         }
 
         private bool IsThereAnAppToTakePictures()
@@ -190,13 +178,24 @@ namespace Fotmi_Android
             return availableActivities != null && availableActivities.Count > 0;
         }
 
+        private void CreateDirectoryForPictures()
+        {
+            ImageHelp.Dir = new File(
+                Environment.GetExternalStoragePublicDirectory(
+                    Environment.DirectoryPictures), "Fotmi_Android");
+            if (!ImageHelp.Dir.Exists())
+            {
+                ImageHelp.Dir.Mkdirs();
+            }
+        }
+
         private void TakeAPicture(object sender, EventArgs eventArgs)
         {
             Intent intent = new Intent(MediaStore.ActionImageCapture);
 
-            AppHelp.File = new File(AppHelp.Dir, String.Format("Images_{0}.jpg", Guid.NewGuid()));
+            ImageHelp.File = new File(ImageHelp.Dir, String.Format("Images_{0}.jpg", Guid.NewGuid()));
 
-            intent.PutExtra(MediaStore.ExtraOutput, Uri.FromFile(AppHelp.File));
+            intent.PutExtra(MediaStore.ExtraOutput, Uri.FromFile(ImageHelp.File));
 
             StartActivityForResult(intent, 0);
         }

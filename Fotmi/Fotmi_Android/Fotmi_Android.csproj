@@ -66,7 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
-    <Compile Include="BitmapHelper.cs" />
+    <Compile Include="Helpers\BitmapHelper.cs" />
     <Compile Include="HomeActivity.cs" />
     <Compile Include="PhotoItemActivity.cs" />
     <Compile Include="PhotoItemListAdapter.cs" />
@@ -110,6 +110,7 @@
       <Name>FotmiPortableLibrary</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
      Other similar extension points exist, see Microsoft.Common.targets.

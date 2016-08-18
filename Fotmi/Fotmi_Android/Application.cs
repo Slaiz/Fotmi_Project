@@ -11,8 +11,8 @@ namespace Fotmi_Android
     {
         public static FotmiApp Current { get; private set; }
 
-        public PhotoItemManager PhotoManager { get; set; }
-        SQLiteConnection conn;
+        public PhotoItemService PhotoService { get; set; }
+        SQLiteConnection _conn;
 
         public FotmiApp(IntPtr handle, global::Android.Runtime.JniHandleOwnership transfer)
             : base(handle, transfer)
@@ -27,9 +27,11 @@ namespace Fotmi_Android
             var sqliteFilename = "PhotoItemDB.db3";
             string libraryPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             var path = Path.Combine(libraryPath, sqliteFilename);
-            conn = new SQLiteConnection(path);
+            _conn = new SQLiteConnection(path);
 
-            PhotoManager = new PhotoItemManager(conn);
+            IRepository repository = new PhotoItemRepository(_conn);
+
+            PhotoService = new PhotoItemService(repository);
         }
     }
 }

@@ -13,18 +13,18 @@ namespace Fotmi_Android
     [Activity(Label = "PhotoItemListAdapter")]
     public class PhotoItemListAdapter : BaseAdapter<PhotoItem>
     {
-        Activity context = null;
-        IList<PhotoItem> photos  = new List<PhotoItem>();
+        Activity _context = null;
+        IList<PhotoItem> _photos  = new List<PhotoItem>();
 
-        public PhotoItemListAdapter(Activity context, IList<PhotoItem> photos) : base()
+        public PhotoItemListAdapter(Activity context, IList<PhotoItem> photos)
         {
-            this.context = context;
-            this.photos = photos;
+            _context = context;
+            _photos = photos;
         }
 
         public override PhotoItem this[int position]
         {
-            get { return photos[position]; }
+            get { return _photos[position]; }
         }
 
         public override long GetItemId(int position)
@@ -34,13 +34,13 @@ namespace Fotmi_Android
 
         public override int Count
         {
-            get { return photos.Count; }
+            get { return _photos.Count; }
         }
 
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
             var view = (convertView ??
-                    context.LayoutInflater.Inflate(
+                    _context.LayoutInflater.Inflate(
                     Resource.Layout.PhotoItemList,
                     parent,
                     false)) as RelativeLayout;
@@ -51,11 +51,11 @@ namespace Fotmi_Android
             var imvImage = view.FindViewById<ImageView>(Resource.Id.Image);
 
             //Assign item's values to the various subviews
-            txtName.SetText(photos[position].Name, TextView.BufferType.Normal);
-            txtDescription.SetText(photos[position].Notes, TextView.BufferType.Normal);
+            txtName.SetText(_photos[position].Name, TextView.BufferType.Normal);
+            txtDescription.SetText(_photos[position].Notes, TextView.BufferType.Normal);
 
-            byte[] i = photos[position].Image;
-            var l = photos[position].Image.Length;
+            byte[] i = _photos[position].Image;
+            var l = _photos[position].Image.Length;
 
             Bitmap b = BitmapFactory.DecodeByteArray(i, 0, l);
 
