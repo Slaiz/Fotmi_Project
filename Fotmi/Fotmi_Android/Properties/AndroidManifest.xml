@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="Fotmi_Android.Fotmi_Android" android:versionCode="1" android:versionName="1.0">
-	<uses-sdk android:minSdkVersion="19" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="Photme.Photme" android:versionCode="1" android:installLocation="auto" android:versionName="0.34">
+	<uses-sdk android:minSdkVersion="22" android:targetSdkVersion="22" />
 	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<application android:label="Fotmi_Android" android:debuggable="true" android:icon="@drawable/icon"></application>
+	<application android:debuggable="true" android:label="Photme"></application>
 </manifest>

@@ -41,35 +41,6 @@ namespace Fotmi_Android
         Button cancelDeleteButton;
         Button captureButton;
 
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
-        {
-            base.OnActivityResult(requestCode, resultCode, data);
-
-            // Make it available in the gallery
-
-            Intent mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
-            Uri contentUri = Uri.FromFile(ImageHelp.File);
-            mediaScanIntent.SetData(contentUri);
-            SendBroadcast(mediaScanIntent);
-
-            // Display in ImageView. We will resize the bitmap to fit the display
-            // Loading the full sized image will consume to much memory 
-            // and cause the application to crash.
-
-            int height = Resources.DisplayMetrics.HeightPixels;
-            int width = imageView.Height;
-
-            ImageHelp.Bitmap = ImageHelp.File.Path.LoadAndResizeBitmap(width, height);
-
-            if (ImageHelp.Bitmap != null)
-            {
-                ImageConverting(ref ImageHelp.Bitmap);
-            }
-
-            // Dispose of the Java side bitmap.
-            GC.Collect();
-        }
-
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -101,8 +72,7 @@ namespace Fotmi_Android
 
             if (_photo.ID == 0)
             {
-                imageView.SetImageResource(Resource.Drawable.Icon);
-
+                imageView.SetImageResource(Resource.Drawable.No_Photo);
             }
             else
             {
@@ -150,7 +120,6 @@ namespace Fotmi_Android
             bitmap = null;
         }
 
-
         void Save()
         {
             _photo.Name = nameTextEdit.Text;
@@ -182,7 +151,8 @@ namespace Fotmi_Android
         {
             ImageHelp.Dir = new File(
                 Environment.GetExternalStoragePublicDirectory(
-                    Environment.DirectoryPictures), "Fotmi_Android");
+                    Environment.DirectoryPictures), "Photme_Android");
+
             if (!ImageHelp.Dir.Exists())
             {
                 ImageHelp.Dir.Mkdirs();
@@ -198,6 +168,35 @@ namespace Fotmi_Android
             intent.PutExtra(MediaStore.ExtraOutput, Uri.FromFile(ImageHelp.File));
 
             StartActivityForResult(intent, 0);
+        }
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+
+            // Make it available in the gallery
+
+            Intent mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
+            Uri contentUri = Uri.FromFile(ImageHelp.File);
+            mediaScanIntent.SetData(contentUri);
+            SendBroadcast(mediaScanIntent);
+
+            // Display in ImageView. We will resize the bitmap to fit the display
+            // Loading the full sized image will consume to much memory 
+            // and cause the application to crash.
+
+            int height = Resources.DisplayMetrics.HeightPixels;
+            int width = imageView.Height;
+
+            ImageHelp.Bitmap = ImageHelp.File.Path.LoadAndResizeBitmap(width, height);
+
+            if (ImageHelp.Bitmap != null)
+            {
+                ImageConverting(ref ImageHelp.Bitmap);
+            }
+
+            // Dispose of the Java side bitmap.
+            GC.Collect();
         }
     }
 }

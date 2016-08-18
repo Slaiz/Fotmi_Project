@@ -10,7 +10,6 @@ namespace Fotmi_Android
     public class FotmiApp : Application
     {
         public static FotmiApp Current { get; private set; }
-
         public PhotoItemService PhotoService { get; set; }
         SQLiteConnection _conn;
 

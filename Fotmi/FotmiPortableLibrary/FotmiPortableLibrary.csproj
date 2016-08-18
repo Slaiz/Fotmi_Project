@@ -34,9 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="IRepository.cs" />
+    <Compile Include="Repository\IRepository.cs" />
     <Compile Include="PhotoDatabase.cs" />
     <Compile Include="Module\PhotoItem.cs" />
+    <Compile Include="Service\IService.cs" />
     <Compile Include="Service\PhotoItemService.cs" />
     <Compile Include="Repository\PhotoItemRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

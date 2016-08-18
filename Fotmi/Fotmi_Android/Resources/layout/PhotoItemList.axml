@@ -7,14 +7,14 @@
         android:id="@+id/NameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18dp"
+        android:textSize="20dp"
         android:text="TextView"
         android:layout_below="@+id/lstItemPhoto" />
     <TextView
         android:id="@+id/NotesText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18dp"
+        android:textSize="20dp"
         android:text="TextView"
         android:layout_below="@+id/NameText" />
     <ImageView

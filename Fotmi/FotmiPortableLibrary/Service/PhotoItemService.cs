@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using FotmiPortableLibrary.Service;
 using SQLite;
 
 namespace FotmiPortableLibrary
 {
     // Manager classes are an abstraction on the data access layers
 
-    public class PhotoItemService
+    public class PhotoItemService:IService
     {
         private readonly IRepository _repository;
 
