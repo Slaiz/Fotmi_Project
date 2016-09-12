@@ -1,20 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
-using Android.Graphics.Drawables;
-using Android.Media;
 using Android.OS;
 using Android.Provider;
-using Android.Views;
 using Android.Widget;
 using FotmiPortableLibrary;
-using File = Java.IO.File;
 using Environment = Android.OS.Environment;
+using File = Java.IO.File;
 using Uri = Android.Net.Uri;
 
 namespace Fotmi_Android
